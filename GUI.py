@@ -14,8 +14,9 @@ from matplotlib.backends.backend_qt5agg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 
-from PyQt5.QtGui import QFont,QIcon, QImage, QPalette, QBrush,QPainter
-from PyQt5.QtCore import Qt
+from PyQt5.QtGui import (QFont,QIcon, QImage, QPalette, QBrush,
+                         QPainter,QPen)
+from PyQt5.QtCore import Qt, QRect
 
 class Monitor(QMainWindow):
     '''Sets up a GUI for finding the potentials using a finite difference 
@@ -34,41 +35,44 @@ class Monitor(QMainWindow):
         self.showMaximized()
         self.setWindowIcon(QIcon('RSIL_Logo.png'))
         self.setWindowTitle('Finite difference solver')
-        self.showMaximized()
+#        self.showMaximized()
+        self.setGeometry(100,100,500,500)
+        self.base_geometry=QRect()
         self.init()
         
         self.menu_bar()
     def init(self):
         self.x_total=QLineEdit(self)
         self.x_total.setFont(self.font)
-        self.x_total.setSizePolicy(self.size_policy,self.size_policy)
+#        self.x_total.setSizePolicy(self.size_policy,self.size_policy)
         self.x_total.setText('X-Direction in microns')
         self.x_total.setToolTip('''Enter the total size in the horizontal
                             direction of the area in question in microns''')
+        self.x_total.setGeome
         
         self.y_total=QLineEdit(self)
         self.y_total.setFont(self.font)
-        self.y_total.setSizePolicy(self.size_policy,self.size_policy)
+#        self.y_total.setSizePolicy(self.size_policy,self.size_policy)
         self.y_total.setText('Y-Direction in microns')
         self.y_total.setToolTip('''Enter the total size in the vertical
                             direction of the area in question in microns''')
         
         self.x_nodes=QLineEdit(self)
         self.x_nodes.setFont(self.font)
-        self.x_nodes.setSizePolicy(self.size_policy,self.size_policy)
+#        self.x_nodes.setSizePolicy(self.size_policy,self.size_policy)
         self.x_nodes.setText('Number of nodes in horizontal direction')
         self.x_nodes.setToolTip('Number of nodes to evaluate in X-Direction')
         
         self.y_nodes=QLineEdit(self)
         self.y_nodes.setFont(self.font)
-        self.y_nodes.setSizePolicy(self.size_policy,self.size_policy)
+#        self.y_nodes.setSizePolicy(self.size_policy,self.size_policy)
         self.y_nodes.setText('Number of nodes in vertical direction')
         self.y_nodes.setToolTip('Number of nodes in the vertical direction')
         
         
         self.terminal_number=QLineEdit(self)
         self.terminal_number.setFont(self.font)
-        self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
+#        self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
         self.terminal_number.setText('Number of terminals')
         self.terminal_number.setToolTip('''Number of terminals used as
                                         boundary conditions. Geometry and
@@ -76,7 +80,7 @@ class Monitor(QMainWindow):
                                         the coming steps''')
         
         self.geometry_entry=QPushButton('Terminal Geometry',self)
-        self.geometry_entry.setSizePolicy(self.size_policy,self.size_policy)
+#        self.geometry_entry.setSizePolicy(self.size_policy,self.size_policy)
         self.geometry_entry.setFont(self.font)
         self.geometry_entry.setToolTip(
                 'Launches window to enter geometric conditions of terminals')
@@ -85,7 +89,7 @@ class Monitor(QMainWindow):
         
         self.calculate=QPushButton('Calculate',self)
         self.calculate.setFont(self.font)
-        self.calculate.setSizePolicy(self.size_policy,self.size_policy)
+#        self.calculate.setSizePolicy(self.size_policy,self.size_policy)
         self.calculate.setToolTip('Calculates the potential at each node and graphs')
 #        self.calculate.clicked.connect(self.calcuation)
         self.calculate.setDisabled(True)
@@ -124,7 +128,7 @@ class Monitor(QMainWindow):
         self.actionQuit.setShortcut('Alt+F4')
         self.menuFile.addActions([self.actionNew,
                                   self.actionQuit])
-    def paintEvent(self,event):
+    def geom_enter(self,event):
         '''Used when entering the geometry of the terminals'''
         #first make sure all the values are filled with correct values
         #and through and error if they are not
@@ -136,12 +140,10 @@ class Monitor(QMainWindow):
             self.number=float(self.terminal_number.text())
             #draw the base rectangular geomtery and apply a scaling factor to 
             #the sizes if need be
-            painter=QPainter()
-            painter.setPen(Qt.black)
             x=self.frameGeometry().width()
-            y=self.frameGeometry().height()
-            painter.drawRect(0,0,self.scalar(self.total_x_)*self.total_x_,
-                             self.scalar(self.total_y_)*self.total_y_)
+            self.base_geometry=QRect(x,10,
+                                     self.scalar(self.total_x_)*self.total_x_,
+                                     self.scalar(self.total_y_)*self.total_y_)
 #           
 #            #create a dictionary to store the information passed to the upcoming 
 #            #widget to be stored in to later draw and analyze the geometry
@@ -150,13 +152,20 @@ class Monitor(QMainWindow):
 #                self.boundary_conditions[i]=[]
         except:
             error_data=QMessageBox(self)
-            error_data.setText('Please Enter either numeric values in all fields')
+            error_data.setText('Please enter numeric values in all fields')
             error_data.setWindowTitle('Numeric Error')
             error_data.exec()
     def scalar(self,lenght):
         '''Determine the proper scaling to adjust the size to be visible'''
         return 1
-
+    
+    def paintEvent(self,event):
+        QMainWindow.paintEvent(self, event)
+        if not self.base_geometry.isNull():
+            painter = QPainter(self)
+            pen = QPen(Qt.black, 2)
+            painter.setPen(pen)
+            painter.drawRect(self.base_geometry)
         
 if __name__=="__main__":
     app=QApplication(sys.argv)
