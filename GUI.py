@@ -8,7 +8,9 @@ from PyQt5.QtWidgets import (QApplication, QPushButton,QWidget,QGridLayout,
                              QSizePolicy,QComboBox,QLineEdit,QTextEdit,
                              QMessageBox,QInputDialog,QMainWindow,QAction
                              ,QDockWidget,QTableWidgetItem,QVBoxLayout,
-                             QFileDialog)
+                             QFileDialog, QSplitter, QFrame,QHBoxLayout,
+                             QStyleFactory)
+
 from matplotlib.backends.qt_compat import QtWidgets
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
@@ -36,51 +38,49 @@ class Monitor(QMainWindow):
         self.setWindowIcon(QIcon('RSIL_Logo.png'))
         self.setWindowTitle('Finite difference solver')
 #        self.showMaximized()
-        self.setGeometry(100,100,500,500)
+        self.setGeometry(100,100,1000,500)
         self.base_geometry=QRect()
         self.init()
         
         self.menu_bar()
     def init(self):
+        '''Setting up the interface for basic information and drawing the 
+        geometry
+        '''
         self.x_total=QLineEdit(self)
         self.x_total.setFont(self.font)
-#        self.x_total.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_total.setSizePolicy(self.size_policy,self.size_policy)
         self.x_total.setText('X-Direction in microns')
         self.x_total.setToolTip('''Enter the total size in the horizontal
                             direction of the area in question in microns''')
-        self.x_total.setGeome
         
         self.y_total=QLineEdit(self)
         self.y_total.setFont(self.font)
-#        self.y_total.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_total.setSizePolicy(self.size_policy,self.size_policy)
         self.y_total.setText('Y-Direction in microns')
-        self.y_total.setToolTip('''Enter the total size in the vertical
-                            direction of the area in question in microns''')
+        self.y_total.setToolTip('''Enter the total size in the vertical direction of the area in question in microns''')
         
         self.x_nodes=QLineEdit(self)
         self.x_nodes.setFont(self.font)
-#        self.x_nodes.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_nodes.setSizePolicy(self.size_policy,self.size_policy)
         self.x_nodes.setText('Number of nodes in horizontal direction')
         self.x_nodes.setToolTip('Number of nodes to evaluate in X-Direction')
         
         self.y_nodes=QLineEdit(self)
         self.y_nodes.setFont(self.font)
-#        self.y_nodes.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_nodes.setSizePolicy(self.size_policy,self.size_policy)
         self.y_nodes.setText('Number of nodes in vertical direction')
         self.y_nodes.setToolTip('Number of nodes in the vertical direction')
         
         
         self.terminal_number=QLineEdit(self)
         self.terminal_number.setFont(self.font)
-#        self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
+        self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
         self.terminal_number.setText('Number of terminals')
-        self.terminal_number.setToolTip('''Number of terminals used as
-                                        boundary conditions. Geometry and
-                                        potential will be entered in
-                                        the coming steps''')
+        self.terminal_number.setToolTip('''Number of terminals used as boundary conditions.\nGeometry and potential will be entered in coming steps''')
         
         self.geometry_entry=QPushButton('Terminal Geometry',self)
-#        self.geometry_entry.setSizePolicy(self.size_policy,self.size_policy)
+        self.geometry_entry.setSizePolicy(self.size_policy,self.size_policy)
         self.geometry_entry.setFont(self.font)
         self.geometry_entry.setToolTip(
                 'Launches window to enter geometric conditions of terminals')
@@ -89,26 +89,54 @@ class Monitor(QMainWindow):
         
         self.calculate=QPushButton('Calculate',self)
         self.calculate.setFont(self.font)
-#        self.calculate.setSizePolicy(self.size_policy,self.size_policy)
+        self.calculate.setSizePolicy(self.size_policy,self.size_policy)
         self.calculate.setToolTip('Calculates the potential at each node and graphs')
 #        self.calculate.clicked.connect(self.calcuation)
         self.calculate.setDisabled(True)
         
-        self.layout=QGridLayout()
-        self.layout.addWidget(self.x_total,0,0,1,2)
-        self.layout.addWidget(self.y_total,1,0,1,2)
-        self.layout.addWidget(self.x_nodes,2,0,1,2)
-        self.layout.addWidget(self.y_nodes,3,0,1,2)
-        self.layout.addWidget(self.terminal_number,4,0,1,2)
-        self.layout.addWidget(self.geometry_entry,5,0)
-        self.layout.addWidget(self.calculate,5,1)
-        
+        #create the basic layout member
+        self.layout=QHBoxLayout()
+        #create a QWidget to use add all the basic information into
+        basic_info_=QWidget()
+        #create a layout for the basic info to be laid out in and put it there
+        basic_layout=QVBoxLayout()
+        basic_layout.addWidget(self.x_total)
+        basic_layout.addWidget(self.y_total)
+        basic_layout.addWidget(self.x_nodes)
+        basic_layout.addWidget(self.y_nodes)
+        basic_layout.addWidget(self.terminal_number)
+        basic_info_.setLayout(basic_layout)
+        #setting up a frame for the drawing rectangle, will be blank
+        #until the drawing begins
+        self.geometry_visualization=QFrame(self)
+        self.geometry_visualization.setFrameShape(QFrame.StyledPanel)
+        #splitting the window horizontally and add the basic info and blank
+        #area for the geometry to be drawn in
+        geom_splitter=QSplitter(Qt.Horizontal)
+        geom_splitter.addWidget(basic_info_)
+        geom_splitter.addWidget(self.geometry_visualization)
+        geom_splitter.setSizes([250,500])
+        #set up a widget to add the buttons to control the execution
+        controls=QWidget()
+        #create a layout and add the buttons to it
+        controls_layout=QHBoxLayout()
+        controls_layout.addWidget(self.geometry_entry)
+        controls_layout.addWidget(self.calculate)
+        controls.setLayout(controls_layout)
+        #add a vertical splitter and add the top splitter and the
+        #bottom widget together and add them to the entire layout
+        controls_spliter=QSplitter(Qt.Vertical)
+        controls_spliter.addWidget(geom_splitter)
+        controls_spliter.addWidget(controls)
+        self.layout.addWidget(controls_spliter)
+        #do some manipulation to get the layouts to play nicely
         self.setLayout(self.layout)
         layout=QWidget()
         layout.setLayout(self.layout)
         self.setCentralWidget(layout)
+        QApplication.setStyle(QStyleFactory.create('Cleanlooks'))
         self.show()
-        
+
     def menu_bar(self):
         '''Create the menu bar for the main window will include
                 Name:       Shortcut:         Function called:
@@ -128,44 +156,131 @@ class Monitor(QMainWindow):
         self.actionQuit.setShortcut('Alt+F4')
         self.menuFile.addActions([self.actionNew,
                                   self.actionQuit])
-    def geom_enter(self,event):
+
+    def geom_enter(self):
         '''Used when entering the geometry of the terminals'''
         #first make sure all the values are filled with correct values
         #and through and error if they are not
-        try:
-            self.total_x_=float(self.x_total.text())
-            self.total_y_=float(self.y_total.text())
-            self.nodes_x=float(self.x_nodes.text())
-            self.nodes_y=float(self.y_nodes.text())
-            self.number=float(self.terminal_number.text())
-            #draw the base rectangular geomtery and apply a scaling factor to 
-            #the sizes if need be
-            x=self.frameGeometry().width()
-            self.base_geometry=QRect(x,10,
-                                     self.scalar(self.total_x_)*self.total_x_,
-                                     self.scalar(self.total_y_)*self.total_y_)
+#        try:
+        self.total_x_=float(self.x_total.text())
+        self.total_y_=float(self.y_total.text())
+        self.nodes_x=float(self.x_nodes.text())
+        self.nodes_y=float(self.y_nodes.text())
+        self.number=int(self.terminal_number.text())
+        #draw the base rectangular geomtery and apply a scaling factor to 
+        #the sizes if need be
+        x=self.frameGeometry().width()-self.geometry_visualization.frameGeometry().width()
+        y=self.geometry_visualization.frameGeometry().height()
+        self.base_geometry=QRect(x,55,
+                                 self.scalar(self.total_x_)*self.total_x_,
+                                 self.scalar(self.total_y_)*self.total_y_)
+        self.update()
 #           
-#            #create a dictionary to store the information passed to the upcoming 
-#            #widget to be stored in to later draw and analyze the geometry
-#            self.boundary_conditions={}
-#            for i in range(self.number):
-#                self.boundary_conditions[i]=[]
-        except:
-            error_data=QMessageBox(self)
-            error_data.setText('Please enter numeric values in all fields')
-            error_data.setWindowTitle('Numeric Error')
-            error_data.exec()
+        #create a dictionary to store the information passed to the upcoming 
+        #widget to be stored in to later draw and analyze the geometry
+        self.boundary_conditions={}
+        for i in range(self.number):
+            self.boundary_conditions[i]=[]
+            
+        entry=PopUp()
+        entry.show()
+#        except:
+#            error_data=QMessageBox(self)
+#            error_data.setText('Please enter numeric values in all fields')
+#            error_data.setWindowTitle('Numeric Error')
+#            error_data.exec()
     def scalar(self,lenght):
-        '''Determine the proper scaling to adjust the size to be visible'''
-        return 1
+        '''Determine the proper scaling to adjust the size to be visible by 
+        taking the largest dimension of the input geometry and scaling it to
+        fit the entire area fo the provided region'''
+        if self.total_x_ or self.total_y_>100:
+            return 1
     
     def paintEvent(self,event):
         QMainWindow.paintEvent(self, event)
         if not self.base_geometry.isNull():
             painter = QPainter(self)
-            pen = QPen(Qt.black, 2)
+            pen = QPen(Qt.black, 1)
             painter.setPen(pen)
             painter.drawRect(self.base_geometry)
+            
+#Create the class needed to pop open the widget to input 
+#the terminal geometry
+class PopUp(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.number_of_terminls=4
+        self.setGeometry(100,100,500,300)
+        self.size_policy=QSizePolicy.Expanding
+        self.font=QFont()
+        self.font.setPointSize(12)
+        self.init()
+    def init(self):
+        '''Initialize all the widgets needed for inputting the geometry
+        '''
+        #set up the combo box to select the terminal to enter geometry for
+        self.terminal_number=QComboBox(self)
+        self.terminal_number.setFont(self.font)
+        self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
+        self.terminal_number.setToolTip('Select the terminal you wish to enter geometry for')
+        for i in range(self.er_of_terminls):
+            self.terminal_numbernumb.addItem(str(i))
+        
+        #widgets for getting the geometry and potential of the selected terminal
+        self.x_start=QLineEdit(self)
+        self.x_start.setFont(self.font)
+        self.x_start.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_start.setToolTip('Enter the starting point given the upper left most corner as the origin')
+        self.x_start.setText('Starting X postion in microns')
+        
+        self.y_start=QLineEdit(self)
+        self.y_start.setFont(self.font)
+        self.y_start.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_start.setToolTip('Enter the starting point given the upper left most corner as the origin')
+        self.y_start.setText('Starting Y position in microns')
+        
+        self.x_length=QLineEdit(self)
+        self.x_length.setFont(self.font)
+        self.x_length.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_length.setToolTip('Length in X direction from starting point, must be greater than 0')
+        self.x_length.setText('X Length in mircons')
+        
+        self.y_length=QLineEdit(self)
+        self.y_length.setFont(self.font)
+        self.y_length.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_length.setToolTip('Length in Y direction from starting point, must be greater than 0')
+        self.y_length.setText('Y Length in mircons')
+        
+        self.potential=QLineEdit(self)
+        self.potential.setFont(self.font)
+        self.potential.setSizePolicy(self.size_policy,self.size_policy)
+        self.potential.setToolTip('Potential Voltage applied at the boundary')
+        self.potential.setText('Potential Voltage in Volts')
+        
+        self.next=QPushButton('Next Terminal',self)
+        self.next.setFont(self.font)
+        self.next.setSizePolicy(self.size_policy,self.size_policy)
+        self.next.setToolTip('Proceed entering the next terminal')
+#        self.next.clicked.connect(self.next_terminal)
+        
+        self.finished=QPushButton('Finished', self)
+        self.finished.setFont(self.font)
+        self.finished.setSizePolicy(self.size_policy,self.size_policy)
+        self.finished.setToolTip('Exit this window and process with calculations')
+#        self.finished.clicked.connect(self.complete)
+        self.finished.setDisabled(True)
+        
+        #add all the stuff into a layout
+        layout=QGridLayout(self)
+        layout.addWidget(self.terminal_number,0,0,1,2)
+        layout.addWidget(self.x_start,1,0)
+        layout.addWidget(self.y_start,2,0)
+        layout.addWidget(self.potential,3,0)
+        layout.addWidget(self.x_length,1,1)
+        layout.addWidget(self.y_length,2,1)
+        layout.addWidget(self.next,3,1)
+        layout.addWidget(self.finished,4,0,1,2)
+        self.setLayout(layout)
         
 if __name__=="__main__":
     app=QApplication(sys.argv)
