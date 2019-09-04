@@ -72,7 +72,6 @@ class Monitor(QMainWindow):
         self.y_nodes.setText('Number of nodes in vertical direction')
         self.y_nodes.setToolTip('Number of nodes in the vertical direction')
         
-        
         self.terminal_number=QLineEdit(self)
         self.terminal_number.setFont(self.font)
         self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
@@ -134,7 +133,6 @@ class Monitor(QMainWindow):
         layout=QWidget()
         layout.setLayout(self.layout)
         self.setCentralWidget(layout)
-        QApplication.setStyle(QStyleFactory.create('Cleanlooks'))
         self.show()
 
     def menu_bar(self):
@@ -170,12 +168,10 @@ class Monitor(QMainWindow):
         #draw the base rectangular geomtery and apply a scaling factor to 
         #the sizes if need be
         x=self.frameGeometry().width()-self.geometry_visualization.frameGeometry().width()
-        y=self.geometry_visualization.frameGeometry().height()
         self.base_geometry=QRect(x,55,
                                  self.scalar(self.total_x_)*self.total_x_,
                                  self.scalar(self.total_y_)*self.total_y_)
-        self.update()
-#           
+#        self.update()
         #create a dictionary to store the information passed to the upcoming 
         #widget to be stored in to later draw and analyze the geometry
         self.boundary_conditions={}
@@ -206,10 +202,10 @@ class Monitor(QMainWindow):
             
 #Create the class needed to pop open the widget to input 
 #the terminal geometry
-class PopUp(QMainWindow):
+class PopUp(QWidget):
     def __init__(self):
         super().__init__()
-        self.number_of_terminls=4
+        self.number_of_terminals=4
         self.setGeometry(100,100,500,300)
         self.size_policy=QSizePolicy.Expanding
         self.font=QFont()
@@ -223,8 +219,8 @@ class PopUp(QMainWindow):
         self.terminal_number.setFont(self.font)
         self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
         self.terminal_number.setToolTip('Select the terminal you wish to enter geometry for')
-        for i in range(self.er_of_terminls):
-            self.terminal_numbernumb.addItem(str(i))
+        for i in range(self.number_of_terminals):
+            self.terminal_number.addItem(str(i))
         
         #widgets for getting the geometry and potential of the selected terminal
         self.x_start=QLineEdit(self)
@@ -285,4 +281,6 @@ class PopUp(QMainWindow):
 if __name__=="__main__":
     app=QApplication(sys.argv)
     ex=Monitor()
+    b=PopUp()
+    b.show()
     sys.exit(app.exec_())        
