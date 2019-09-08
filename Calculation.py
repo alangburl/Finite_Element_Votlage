@@ -39,27 +39,79 @@ class Voltage_Calculation():
             while counter<=matrix_locators[1]:
                 #set the potential in V for the 'b' matrix
                 self.b_matrix[counter]=matrix_locators[2]
-                #set the a matrix locations to be '1' signifying
+                #set the 'a' matrix locations to be '1' signifying
                 #a known boundary condition
                 self.a_matrix[counter][counter]=1
                 counter+=1
-                
         #handle the remainder of the boundary conditions
         #take care of the top and bottom edges of the matrix
-        for k in range(len(self.x_nodes)):
+        #less the two corners as they are special cases
+        delta_x=self.x_nodes[1]-self.x_nodes[0]
+        delta_y=self.y_nodes[1]-self.y_nodes[0]
+        for k in range(1,len(self.x_nodes)-1):
             if self.a_matrix[k][k]!=1:
-                True 
+                self.a_matrix[k][k]=1
+                self.a_matrix[k][k+1]=-delta_y/(2*(delta_x+delta_y))
+                self.a_matrix[k][k-1]=-delta_y/(2*(delta_x+delta_y))
+                self.a_matrix[k][k+len(self.x_nodes)]=(-delta_x/
+                            (delta_x+delta_y))
+        for k in range(len(self.x_nodes)-1,1,-1):
+            if self.a_matrix[-k][-k]!=1:
+                self.a_matrix[-k][-k]=1
+                self.a_matrix[-k][-k+1]=-delta_y/(2*(delta_x+delta_y))
+                self.a_matrix[-k][-k-1]=-delta_y/(2*(delta_x+delta_y))
+                self.a_matrix[-k][-k-len(self.x_nodes)]=(-delta_x/
+                             (delta_x+delta_y))
+        #handle the left side of the geometric boundary conditions
+        mul=len(self.x_nodes)
+        for k in range(1,len(self.y_nodes)):
+            if self.a_matrix[k*mul][k*mul]!=1:
+                self.a_matrix[k*mul][k*mul]=1
+                self.a_matrix[k*mul][k*mul+1]=-delta_y/(delta_x+delta_y)
+                self.a_matrix[k*mul][k*(mul+1)]=-delta_x/(2*(delta_x+delta_y))
+                self.a_matrix[k*mul][k*(mul-1)]=-delta_x/(2*(delta_x+delta_y))
+        #handle the right side geometric boundaries
+#        for k in range(1,len(self.y_nodes)):
+            if self.a_matrix[k*(mul+1)-1][k*(mul+1)-1]!=1:
+                self.a_matrix[k*(mul+1)-1][k*(mul+1)-1]=1
+                self.a_matrix[k*(mul+1)-1][k*(mul+1)-2]=(-delta_y/
+                              (delta_x+delta_y))
+                self.a_matrix[k*(mul+1)-1][k*mul-1]=(-delta_x/
+                              (2*(delta_x+delta_y)))
+                self.a_matrix[k*(mul+1)-1][k*(mul+2)-1]=(-delta_x/
+                              (2*(delta_x+delta_y)))
+        #handle the boundary conditions at the four corners
+        corner_locations=[0,len(self.x_nodes)-1,-1,-len(self.x_nodes)]
+        if self.a_matrix[0][0]!=1:
+            self.a_matrix[0][0]=1
+            self.a_matrix[0][1]=-delta_y/(delta_y+delta_x)
+            self.a_matrix[0][len(self.x_nodes)]=-delta_x/(delta_y+delta_x)
+        if self.a_matrix[len(self.x_nodes)-1][len(self.x_nodes)-1]!=1:
+            self.a_matrix[len(self.x_nodes)-1][len(self.x_nodes)-1]=1
+            self.a_matrix[len(self.x_nodes)-1][len(self.x_nodes)-2]=(-delta_y/
+                          (delta_x+delta_y))
+            self.a_matrix[len(self.x_nodes)-1][len(self.x_nodes)*2-1]=(-delta_x
+                          /(delta_x+delta_y))
+        if self.a_matrix[-1][-1]!=1:
+            self.a_matrix[-1][-1]=1
+            self.a_matrix[-1][-2]=-delta_y/(delta_x+delta_y)
+            self.a_matrix[-1][-1-len(self.x_nodes)]=-delta_x/(delta_x+delta_y)
+        if self.a_matrix[-len(self.x_nodes)][-len(self.x_nodes)]!=1:
+            self.a_matrix[-len(self.x_nodes)][-len(self.x_nodes)]=1
+            self.a_matrix[-len(self.x_nodes)][-len(self.x_nodes)+1]=(-delta_y/
+                          (delta_x+delta_y))
+            self.a_matrix[-len(self.x_nodes)][-2*len(self.x_nodes)+1]=(-delta_x
+                          /(delta_y+delta_x))
     def field_conditions(self):
         '''Handle the nodes in the field of the matrix
            Using a finite difference simpliciation of Poisson's equations:
-               V_w-del_y/(4(del_x+del_y))(V_(x-1)+V_(x+1))
-               -del_x/(4(del_x+del_y))(V_(above)+V_(below))
-               =-rho*del_x*del_y/(4e(del_x+del_y))
+               V_w-del_y/(2(del_x+del_y))(V_(x-1)+V_(x+1))
+               -del_x/(2(del_x+del_y))(V_(above)+V_(below))
+               =-rho*del_x*del_y/(2e(del_x+del_y))
         '''
         #find delta x and delta y
         delta_x=self.x_nodes[1]-self.x_nodes[0]
         delta_y=self.y_nodes[1]-self.y_nodes[0]
-        
         #since this function will be ran after the boundary conditions
         #have been handled, the only rows having a 0 on the diagonal
         #are the rows requiring information to be added
@@ -68,11 +120,13 @@ class Voltage_Calculation():
                 if self.a_matrix[row][column]!=1:
                     self.a_matrix[row][column]=1 #set the node to be 1
                     #set the adjacent nodes 
-                    self.a_matrix[row][column+1]=-delta_y/(4*(delta_x+delta_y))
-                    self.a_matrix[row][column-1]=-delta_y/(4*(delta_x+delta_y))
+                    self.a_matrix[row][column+1]=-delta_y/(2*(delta_x+delta_y))
+                    self.a_matrix[row][column-1]=-delta_y/(2*(delta_x+delta_y))
                     #set the nodes above and below
-                    self.a_matrix[row][column+len(self.x_nodes)]=-delta_x/(4*(delta_y+delta_x))
-                    self.a_matrix[row][column-len(self.x_nodes)]=-delta_x/(4*(delta_y+delta_x))
+                    self.a_matrix[row][column+len(self.x_nodes)]=-delta_x/(2*
+                                 (delta_y+delta_x))
+                    self.a_matrix[row][column-len(self.x_nodes)]=-delta_x/(2*
+                                 (delta_y+delta_x))
     def find_locations(self,geometry_list):
         '''Used to find the starting and ending indices of the matrix to
         and set the locations to the specified potential in the A matrix
@@ -87,7 +141,7 @@ class Voltage_Calculation():
             #deterimine the starting point in the matrix going from top down
             for j in range(len(self.y_nodes)):
                 if geometry_list[1]<=self.y_nodes[j]:
-                    start_location=j*len(self.x_nodes) #setting the starting element
+                    start_location=j*len(self.x_nodes)
                     break
             for j in range(len(self.y_nodes)):
                 if geometry_list[1]+geometry_list[3]<=self.y_nodes[j]:
@@ -125,6 +179,12 @@ class Voltage_Calculation():
                     end_location=j
                     break
         return [start_location,end_location,geometry_list[4]]
+    
+    def solve(self):
+        '''Sovle the equation Ax=b for the x vector, the potentilal voltages
+        '''
+        voltage_vector=np.zeros(len(self.x_nodes)*(len(self.y_nodes)))
+        voltage_vector=np.linalg.solve(self.a_matrix,self.b_matrix)
                 
 if __name__=="__main__":
     Voltage_Calculation(100,100,100,100)
