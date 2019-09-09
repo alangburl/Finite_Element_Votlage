@@ -41,7 +41,6 @@ class Monitor(QMainWindow):
         self.setGeometry(100,100,1000,500)
         self.base_geometry=QRect()
         self.init()
-        
         self.menu_bar()
     def init(self):
         '''Setting up the interface for basic information and drawing the 
@@ -129,7 +128,7 @@ class Monitor(QMainWindow):
         controls_spliter.addWidget(controls)
         self.layout.addWidget(controls_spliter)
         #do some manipulation to get the layouts to play nicely
-        self.setLayout(self.layout)
+#        self.setLayout(self.layout)
         layout=QWidget()
         layout.setLayout(self.layout)
         self.setCentralWidget(layout)
@@ -171,15 +170,14 @@ class Monitor(QMainWindow):
         self.base_geometry=QRect(x,55,
                                  self.scalar(self.total_x_)*self.total_x_,
                                  self.scalar(self.total_y_)*self.total_y_)
-#        self.update()
+        self.update()
         #create a dictionary to store the information passed to the upcoming 
         #widget to be stored in to later draw and analyze the geometry
         self.boundary_conditions={}
         for i in range(self.number):
             self.boundary_conditions[i]=[]
-            
-        entry=PopUp()
-        entry.show()
+        self.win=PopUp()
+        self.win.show()
 #        except:
 #            error_data=QMessageBox(self)
 #            error_data.setText('Please enter numeric values in all fields')
@@ -200,6 +198,11 @@ class Monitor(QMainWindow):
             painter.setPen(pen)
             painter.drawRect(self.base_geometry)
             
+class atest(QWidget):
+    def __init__(self):
+        super().__init__()
+        x=QLineEdit(self)
+            
 #Create the class needed to pop open the widget to input 
 #the terminal geometry
 class PopUp(QWidget):
@@ -214,6 +217,8 @@ class PopUp(QWidget):
     def init(self):
         '''Initialize all the widgets needed for inputting the geometry
         '''
+        #define the dictionary values will be added to 
+        self.information={}
         #set up the combo box to select the terminal to enter geometry for
         self.terminal_number=QComboBox(self)
         self.terminal_number.setFont(self.font)
@@ -226,7 +231,7 @@ class PopUp(QWidget):
         self.x_start=QLineEdit(self)
         self.x_start.setFont(self.font)
         self.x_start.setSizePolicy(self.size_policy,self.size_policy)
-        self.x_start.setToolTip('Enter the starting point given the upper left most corner as the origin')
+        self.x_start.setToolTip('Enter the starting point given the bottom right most corner as the origin')
         self.x_start.setText('Starting X postion in microns')
         
         self.y_start=QLineEdit(self)
@@ -278,9 +283,18 @@ class PopUp(QWidget):
         layout.addWidget(self.finished,4,0,1,2)
         self.setLayout(layout)
         
+    def next_terminal(self):
+        '''Ingest the info from each of the fields and add it to the
+        dictionary of values
+        
+        The list of values is in the following order:
+                x_start, y_start, x_length,y_length, potential
+        '''
+        self.information[self.terminal_number.currentItem()]=[
+                self.x_start.text(),self.y_start.text(),self.x_length.text(),
+                self.y_length.text(),self.potential.text()]
+        self.terminal_number.removeItem(self.terminal_number.currentItem())
 if __name__=="__main__":
     app=QApplication(sys.argv)
     ex=Monitor()
-    b=PopUp()
-    b.show()
     sys.exit(app.exec_())        
