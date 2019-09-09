@@ -18,6 +18,7 @@ from matplotlib.figure import Figure
 from PyQt5.QtGui import (QFont,QIcon, QImage, QPalette, QBrush,
                          QPainter,QPen)
 from PyQt5.QtCore import Qt, QRect
+from Calculation import Voltage_Calculation
 
 class Monitor(QMainWindow):
     '''Sets up a GUI for finding the potentials using a finite difference 
@@ -48,33 +49,58 @@ class Monitor(QMainWindow):
         self.x_total=QLineEdit(self)
         self.x_total.setFont(self.font)
         self.x_total.setSizePolicy(self.size_policy,self.size_policy)
-        self.x_total.setText('X-Direction in microns')
-        self.x_total.setToolTip('''Enter the total size in the horizontal
-                            direction of the area in question in microns''')
+        self.x_total.setText('0')
+        self.x_total.setToolTip('''Enter the total size in the horizontal\ndirection of the area in question in microns''')
         
         self.y_total=QLineEdit(self)
         self.y_total.setFont(self.font)
         self.y_total.setSizePolicy(self.size_policy,self.size_policy)
-        self.y_total.setText('Y-Direction in microns')
+        self.y_total.setText('0')
         self.y_total.setToolTip('''Enter the total size in the vertical direction of the area in question in microns''')
         
         self.x_nodes=QLineEdit(self)
         self.x_nodes.setFont(self.font)
         self.x_nodes.setSizePolicy(self.size_policy,self.size_policy)
-        self.x_nodes.setText('Number of nodes in horizontal direction')
-        self.x_nodes.setToolTip('Number of nodes to evaluate in X-Direction')
+        self.x_nodes.setText('0')
+        self.x_nodes.setToolTip('Number of nodes to evaluate in the horizontal direction')
         
         self.y_nodes=QLineEdit(self)
         self.y_nodes.setFont(self.font)
         self.y_nodes.setSizePolicy(self.size_policy,self.size_policy)
-        self.y_nodes.setText('Number of nodes in vertical direction')
+        self.y_nodes.setText('0')
         self.y_nodes.setToolTip('Number of nodes in the vertical direction')
         
         self.terminal_number=QLineEdit(self)
         self.terminal_number.setFont(self.font)
         self.terminal_number.setSizePolicy(self.size_policy,self.size_policy)
-        self.terminal_number.setText('Number of terminals')
+        self.terminal_number.setText('0')
         self.terminal_number.setToolTip('''Number of terminals used as boundary conditions.\nGeometry and potential will be entered in coming steps''')
+        
+        #Labels for the geometry entry sections
+        self.x_total_label=QLabel(self)
+        self.x_total_label.setFont(self.font)
+        self.x_total_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_total_label.setText('x-Direction(um):')
+
+        self.y_total_label=QLabel(self)
+        self.y_total_label.setFont(self.font)
+        self.y_total_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_total_label.setText('y-Direction(um):')  
+        
+        self.x_nodes_label=QLabel(self)
+        self.x_nodes_label.setFont(self.font)
+        self.x_nodes_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_nodes_label.setText('# nodes in x:')
+                                   
+        self.y_nodes_label=QLabel(self)
+        self.y_nodes_label.setFont(self.font)
+        self.y_nodes_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_nodes_label.setText('# nodes in y:')    
+        
+        self.terminal_number_label=QLabel(self)
+        self.terminal_number_label.setFont(self.font)
+        self.terminal_number_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.terminal_number_label.setText('# of terminals:')
         
         self.geometry_entry=QPushButton('Terminal Geometry',self)
         self.geometry_entry.setSizePolicy(self.size_policy,self.size_policy)
@@ -88,7 +114,7 @@ class Monitor(QMainWindow):
         self.calculate.setFont(self.font)
         self.calculate.setSizePolicy(self.size_policy,self.size_policy)
         self.calculate.setToolTip('Calculates the potential at each node and graphs')
-#        self.calculate.clicked.connect(self.calcuation)
+        self.calculate.clicked.connect(self.calculation)
         self.calculate.setDisabled(True)
         
         #create the basic layout member
@@ -96,12 +122,17 @@ class Monitor(QMainWindow):
         #create a QWidget to use add all the basic information into
         basic_info_=QWidget()
         #create a layout for the basic info to be laid out in and put it there
-        basic_layout=QVBoxLayout()
-        basic_layout.addWidget(self.x_total)
-        basic_layout.addWidget(self.y_total)
-        basic_layout.addWidget(self.x_nodes)
-        basic_layout.addWidget(self.y_nodes)
-        basic_layout.addWidget(self.terminal_number)
+        basic_layout=QGridLayout()
+        basic_layout.addWidget(self.x_total_label,0,0)
+        basic_layout.addWidget(self.x_total,0,1)
+        basic_layout.addWidget(self.y_total_label,1,0)
+        basic_layout.addWidget(self.y_total,1,1)
+        basic_layout.addWidget(self.x_nodes_label,2,0)
+        basic_layout.addWidget(self.x_nodes,2,1)
+        basic_layout.addWidget(self.y_nodes_label,3,0)
+        basic_layout.addWidget(self.y_nodes,3,1)
+        basic_layout.addWidget(self.terminal_number_label,4,0)
+        basic_layout.addWidget(self.terminal_number,4,1)
         basic_info_.setLayout(basic_layout)
         #setting up a frame for the drawing rectangle, will be blank
         #until the drawing begins
@@ -160,8 +191,8 @@ class Monitor(QMainWindow):
 #        try:
         self.total_x_=float(self.x_total.text())
         self.total_y_=float(self.y_total.text())
-        self.nodes_x=float(self.x_nodes.text())
-        self.nodes_y=float(self.y_nodes.text())
+        self.nodes_x=int(self.x_nodes.text())
+        self.nodes_y=int(self.y_nodes.text())
         self.number=int(self.terminal_number.text())
         #draw the base rectangular geomtery and apply a scaling factor to 
         #the sizes if need be
@@ -178,6 +209,7 @@ class Monitor(QMainWindow):
         self.win=PopUp(self.number)
         self.win.show()
         self.calculation_data=self.win.information
+        self.calculate.setEnabled(True)
 #        except:
 #            error_data=QMessageBox(self)
 #            error_data.setText('Please enter numeric values in all fields')
@@ -196,13 +228,15 @@ class Monitor(QMainWindow):
             painter = QPainter(self)
             pen = QPen(Qt.black, 1)
             painter.setPen(pen)
-            painter.drawRect(self.base_geometry)
+            painter.drawRect(self.base_geometry)  
             
-class atest(QWidget):
-    def __init__(self):
-        super().__init__()
-        x=QLineEdit(self)
-            
+    def calculation(self):
+        '''Call the calculation method and run it to get the results'''
+        print('here')
+        self.values=Voltage_Calculation(self.nodes_x,self.nodes_y,
+                             self.total_x_,self.total_y_,self.calculation_data)
+        print('there')
+        
 #Create the class needed to pop open the widget to input 
 #the terminal geometry
 class PopUp(QWidget):
@@ -238,19 +272,21 @@ class PopUp(QWidget):
         self.y_start=QLineEdit(self)
         self.y_start.setFont(self.font)
         self.y_start.setSizePolicy(self.size_policy,self.size_policy)
-        self.y_start.setToolTip('Enter the starting point given the upper left most corner as the origin')
+        self.y_start.setToolTip('Enter the starting point given the bottom right most corner as the origin')
         self.y_start.setText('0')
         
         self.x_length=QLineEdit(self)
         self.x_length.setFont(self.font)
         self.x_length.setSizePolicy(self.size_policy,self.size_policy)
-        self.x_length.setToolTip('Length in X direction from starting point, must be greater than 0')
+        self.x_length.setToolTip(
+                'Length in X direction from starting point, must be greater than 0')
         self.x_length.setText('0')
         
         self.y_length=QLineEdit(self)
         self.y_length.setFont(self.font)
         self.y_length.setSizePolicy(self.size_policy,self.size_policy)
-        self.y_length.setToolTip('Length in Y direction from starting point, must be greater than 0')
+        self.y_length.setToolTip(
+                'Length in Y direction from starting point, must be greater than 0')
         self.y_length.setText('0')
         
         self.potential=QLineEdit(self)
@@ -298,8 +334,9 @@ class PopUp(QWidget):
         self.finished=QPushButton('Finished', self)
         self.finished.setFont(self.font)
         self.finished.setSizePolicy(self.size_policy,self.size_policy)
-        self.finished.setToolTip('Exit this window and process with calculations')
-#        self.finished.clicked.connect(self.complete)
+        self.finished.setToolTip(
+                'Exit this window and process with calculations')
+        self.finished.clicked.connect(self.complete)
         self.finished.setDisabled(True)
         
         #add all the stuff into a layout
@@ -330,7 +367,18 @@ class PopUp(QWidget):
         self.information[self.terminal_number.currentText()]=[
                 self.x_start.text(),self.y_start.text(),self.x_length.text(),
                 self.y_length.text(),self.potential.text()]
-        self.terminal_number.removeItem(self.terminal_number.findText(self.terminal_number.currentText()))
+        self.terminal_number.removeItem(self.terminal_number.findText(
+                self.terminal_number.currentText()))
+        if self.terminal_number.count()==1:
+            self.finished.setEnabled(True)
+            self.next.setDisabled(True)
+    def complete(self):
+        '''Close the second window
+        '''
+        self.information[self.terminal_number.currentText()]=[
+                self.x_start.text(),self.y_start.text(),self.x_length.text(),
+                self.y_length.text(),self.potential.text()]        
+        self.close()
 if __name__=="__main__":
     app=QApplication(sys.argv)
     ex=Monitor()
