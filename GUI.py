@@ -14,8 +14,7 @@ from matplotlib.backends.qt_compat import QtWidgets
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
-
-from PyQt5.QtGui import (QFont,QIcon, QImage, QPalette, QBrush,
+from PyQt5.QtGui import (QFont,QIcon,
                          QPainter,QPen)
 from PyQt5.QtCore import Qt, QRect
 from Calculation import Voltage_Calculation
@@ -232,10 +231,14 @@ class Monitor(QMainWindow):
             
     def calculation(self):
         '''Call the calculation method and run it to get the results'''
-        print('here')
+        self.calculate.setDisabled(True)
+        self.geometry_entry.setDisabled(True)
         self.values=Voltage_Calculation(self.nodes_x,self.nodes_y,
                              self.total_x_,self.total_y_,self.calculation_data)
-        print('there')
+        self.plot=PlotCanvas(self.values.x_nodes,
+                             self.values.y_nodes,self.values.vector)
+        self.calculate.setEnabled(True)
+        self.geometry_entry.setEnabled(True)
         
 #Create the class needed to pop open the widget to input 
 #the terminal geometry
@@ -365,8 +368,10 @@ class PopUp(QWidget):
                 x_start, y_start, x_length,y_length, potential
         '''
         self.information[self.terminal_number.currentText()]=[
-                self.x_start.text(),self.y_start.text(),self.x_length.text(),
-                self.y_length.text(),self.potential.text()]
+                float(self.x_start.text()),float(self.y_start.text()),
+                float(self.x_length.text()),
+                float(self.y_length.text()),float(self.potential.text())]
+        
         self.terminal_number.removeItem(self.terminal_number.findText(
                 self.terminal_number.currentText()))
         if self.terminal_number.count()==1:
@@ -376,9 +381,31 @@ class PopUp(QWidget):
         '''Close the second window
         '''
         self.information[self.terminal_number.currentText()]=[
-                self.x_start.text(),self.y_start.text(),self.x_length.text(),
-                self.y_length.text(),self.potential.text()]        
+                float(self.x_start.text()),float(self.y_start.text()),
+                float(self.x_length.text()),
+                float(self.y_length.text()),float(self.potential.text())]        
         self.close()
+
+class PlotCanvas(QtWidgets.QMainWindow):
+    def __init__(self,x_values,y_values,voltages):
+        super(PlotCanvas, self).__init__()
+        self.setWindowTitle('Voltage Distribution')
+        self._main = QtWidgets.QWidget()
+        self.setCentralWidget(self._main)
+        layout = QtWidgets.QVBoxLayout(self._main)
+        fig=Figure(figsize=(8, 8))
+        static_canvas = FigureCanvas(fig)
+        layout.addWidget(static_canvas)
+        self.addToolBar(NavigationToolbar(static_canvas, self))
+        
+        self.plots = static_canvas.figure.subplots()
+        contour=self.plots.contourf(x_values, y_values,voltages,levels=20)
+        fig.colorbar(contour)        
+        self.plots.set_xlabel(r'x($\mu m$)')
+        self.plots.set_ylabel(r'y($\mu m$)')
+        self.plots.set_title('Potential distribution across planar device')
+        self.show()
+        
 if __name__=="__main__":
     app=QApplication(sys.argv)
     ex=Monitor()

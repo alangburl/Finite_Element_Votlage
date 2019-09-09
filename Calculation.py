@@ -177,10 +177,12 @@ class Voltage_Calculation():
             for j in range(len(self.x_nodes)-1,-1,-1):
                 if geometry_list[0]>=self.x_nodes[j]:
                     start_location=j
+                    print(start_location)
                     break
             for j in range(len(self.x_nodes)-1,-1,-1):
                 if geometry_list[0]+geometry_list[2]>=self.x_nodes[j]:
                     end_location=j
+                    print(end_location)
                     break
             for j in range(end_location+1,start_location,-1):
                 self.a_matrix[-j][-j]=1
@@ -205,5 +207,6 @@ class Voltage_Calculation():
         color_bar=fig.colorbar(contour)            
 if __name__=="__main__":
     s=time.time()
-    x=Voltage_Calculation(100,100,50,50,{0:[0,0,50,0,500],1:[0,50,10,0,200],2:[45,50,4.5,0,50]})
+    x=Voltage_Calculation(100,100,50,50,{0:[0,0,50,0,500],1:[0,50,10,0,200],
+                                         2:[45,50,4.5,0,50]})
     run=time.time()-s
