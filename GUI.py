@@ -9,8 +9,7 @@ from PyQt5.QtWidgets import (QApplication, QPushButton,QWidget,QGridLayout,
                              QMessageBox,QInputDialog,QMainWindow,QAction
                              ,QDockWidget,QTableWidgetItem,QVBoxLayout,
                              QFileDialog, QSplitter, QFrame,QHBoxLayout,
-                             QStyleFactory)
-
+                             QStyleFactory,QLabel)
 from matplotlib.backends.qt_compat import QtWidgets
 from matplotlib.backends.backend_qt5agg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
@@ -176,8 +175,9 @@ class Monitor(QMainWindow):
         self.boundary_conditions={}
         for i in range(self.number):
             self.boundary_conditions[i]=[]
-        self.win=PopUp()
+        self.win=PopUp(self.number)
         self.win.show()
+        self.calculation_data=self.win.information
 #        except:
 #            error_data=QMessageBox(self)
 #            error_data.setText('Please enter numeric values in all fields')
@@ -206,13 +206,14 @@ class atest(QWidget):
 #Create the class needed to pop open the widget to input 
 #the terminal geometry
 class PopUp(QWidget):
-    def __init__(self):
+    def __init__(self,number_terminals):
         super().__init__()
-        self.number_of_terminals=4
+        self.number_of_terminals=number_terminals
         self.setGeometry(100,100,500,300)
         self.size_policy=QSizePolicy.Expanding
         self.font=QFont()
         self.font.setPointSize(12)
+        self.setWindowTitle('Terminal Geometry Entry')
         self.init()
     def init(self):
         '''Initialize all the widgets needed for inputting the geometry
@@ -232,37 +233,67 @@ class PopUp(QWidget):
         self.x_start.setFont(self.font)
         self.x_start.setSizePolicy(self.size_policy,self.size_policy)
         self.x_start.setToolTip('Enter the starting point given the bottom right most corner as the origin')
-        self.x_start.setText('Starting X postion in microns')
+        self.x_start.setText('0')
         
         self.y_start=QLineEdit(self)
         self.y_start.setFont(self.font)
         self.y_start.setSizePolicy(self.size_policy,self.size_policy)
         self.y_start.setToolTip('Enter the starting point given the upper left most corner as the origin')
-        self.y_start.setText('Starting Y position in microns')
+        self.y_start.setText('0')
         
         self.x_length=QLineEdit(self)
         self.x_length.setFont(self.font)
         self.x_length.setSizePolicy(self.size_policy,self.size_policy)
         self.x_length.setToolTip('Length in X direction from starting point, must be greater than 0')
-        self.x_length.setText('X Length in mircons')
+        self.x_length.setText('0')
         
         self.y_length=QLineEdit(self)
         self.y_length.setFont(self.font)
         self.y_length.setSizePolicy(self.size_policy,self.size_policy)
         self.y_length.setToolTip('Length in Y direction from starting point, must be greater than 0')
-        self.y_length.setText('Y Length in mircons')
+        self.y_length.setText('0')
         
         self.potential=QLineEdit(self)
         self.potential.setFont(self.font)
         self.potential.setSizePolicy(self.size_policy,self.size_policy)
         self.potential.setToolTip('Potential Voltage applied at the boundary')
-        self.potential.setText('Potential Voltage in Volts')
+        self.potential.setText('0')
+        #labels for the individual boxes
+        self.terminal_number_label=QLabel(self)
+        self.terminal_number_label.setText('Terminal Number:')
+        self.terminal_number_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.terminal_number_label.setFont(self.font)
+        
+        self.x_start_label=QLabel(self)
+        self.x_start_label.setText('Starting x(um):')
+        self.x_start_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_start_label.setFont(self.font)
+        
+        self.y_start_label=QLabel(self)
+        self.y_start_label.setText('Starting y(um):')
+        self.y_start_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_start_label.setFont(self.font)
+        
+        self.x_length_label=QLabel(self)
+        self.x_length_label.setText('x Length(um):')
+        self.x_length_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.x_length_label.setFont(self.font)
+        
+        self.y_length_label=QLabel(self)
+        self.y_length_label.setText('y Length(um):')
+        self.y_length_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.y_length_label.setFont(self.font)
+        
+        self.potential_label=QLabel(self)
+        self.potential_label.setText('Terminal Potential(V):')
+        self.potential_label.setSizePolicy(self.size_policy,self.size_policy)
+        self.potential_label.setFont(self.font)
         
         self.next=QPushButton('Next Terminal',self)
         self.next.setFont(self.font)
         self.next.setSizePolicy(self.size_policy,self.size_policy)
         self.next.setToolTip('Proceed entering the next terminal')
-#        self.next.clicked.connect(self.next_terminal)
+        self.next.clicked.connect(self.next_terminal)
         
         self.finished=QPushButton('Finished', self)
         self.finished.setFont(self.font)
@@ -273,14 +304,20 @@ class PopUp(QWidget):
         
         #add all the stuff into a layout
         layout=QGridLayout(self)
-        layout.addWidget(self.terminal_number,0,0,1,2)
-        layout.addWidget(self.x_start,1,0)
-        layout.addWidget(self.y_start,2,0)
-        layout.addWidget(self.potential,3,0)
-        layout.addWidget(self.x_length,1,1)
-        layout.addWidget(self.y_length,2,1)
-        layout.addWidget(self.next,3,1)
-        layout.addWidget(self.finished,4,0,1,2)
+        layout.addWidget(self.terminal_number,0,1,1,3)
+        layout.addWidget(self.terminal_number_label,0,0)
+        layout.addWidget(self.x_start,1,1)
+        layout.addWidget(self.x_start_label,1,0)
+        layout.addWidget(self.y_start,2,1)
+        layout.addWidget(self.y_start_label,2,0)
+        layout.addWidget(self.potential,3,1)
+        layout.addWidget(self.potential_label,3,0)
+        layout.addWidget(self.x_length,1,3)
+        layout.addWidget(self.x_length_label,1,2)
+        layout.addWidget(self.y_length,2,3)
+        layout.addWidget(self.y_length_label,2,2)
+        layout.addWidget(self.next,3,2,1,2)
+        layout.addWidget(self.finished,4,0,1,4)
         self.setLayout(layout)
         
     def next_terminal(self):
@@ -290,10 +327,10 @@ class PopUp(QWidget):
         The list of values is in the following order:
                 x_start, y_start, x_length,y_length, potential
         '''
-        self.information[self.terminal_number.currentItem()]=[
+        self.information[self.terminal_number.currentText()]=[
                 self.x_start.text(),self.y_start.text(),self.x_length.text(),
                 self.y_length.text(),self.potential.text()]
-        self.terminal_number.removeItem(self.terminal_number.currentItem())
+        self.terminal_number.removeItem(self.terminal_number.findText(self.terminal_number.currentText()))
 if __name__=="__main__":
     app=QApplication(sys.argv)
     ex=Monitor()
