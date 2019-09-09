@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 from numpy import average
 #prefined imports
 import sys,os,time
