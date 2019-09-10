@@ -1,0 +1,98 @@
+\documentclass[..Spectroscopy.tex]{subfiles}
+
+\usepackage{amsmath}
+\usepackage{gensymb}
+\usepackage{standalone}
+\usepackage{verbatim}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\usepackage[a4paper,margin=1in,footskip=0.25in]{geometry}
+\usepackage{graphicx}
+\usepackage{mathptmx}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+
+\begin{document}
+\section{Theory}
+	Gamma-rays are emitted in discrete energies, this allows for the analysis of a sources spectral data to determine the composition of the source. A typical gamma-ray spectroscopy has distinct features seen in Figure \ref{fig:gamma_spectrum}. 
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=\linewidth]{gamma_spectrum.png}
+		\caption{A typical gamma-ray spectrum.\cite{mcgregor}}
+		\label{fig:gamma_spectrum}
+	\end{figure}
+The various features are caused by three main methods of interaction in the material:
+	\begin{enumerate}
+		\item Photoelectric absorption
+		\item Compton scattering
+		\item Pair production
+	\end{enumerate}
+\noindent
+\subsection{Photoelectric absorption}
+	A photoelectric absorption occurs when a gamma-ray is absorbed by an atom in the medium, causing a bound electron to released at the energy of the photon, less the binding energy. The photoelectric effect and the full energy peak appear the same on the graph, however, the full energy peak is not created solely through photoelectric absorption. \cite{photo_effect}
+\subsection{Compton scattering}
+	Compton scattering occurs when a gamma-ray interacts with a bound electron. This only sends a portion of the energy to the excited electron. This process is seen in Figure \ref{fig:compton}. 
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.5\linewidth]{compton_scattering.png}
+		\caption{The process of Compton scattering in relation to a gamma-ray.\cite{mcgregor}}
+		\label{fig:compton}
+	\end{figure}
+The resultant energies is dependent on the incident energy and the scattering angle. Compton scattering directly leads to both the Compton edge and Compton gap on the typical spetra.  The Compton edge occurs when the scattered electron has the most energy, this occurs when the deflection angle is $180\degree$. This is described by equation (\ref{eq:analy_comp}). 
+	\begin{equation}
+		E_{max}=E_\gamma -\frac{E_\gamma}{1+2 \frac{E_\gamma}{mc^2}}
+		\label{eq:analy_comp}
+	\end{equation}
+Where $E_\gamma$ is the incident gamma ray energy and $mc^2$ is the rest mass energy of the electron, 511keV.\cite{mcgregor}. The Compton gap occurs between the Compton edge and the full energy peak. The range of which is only the difference between the energy of the full energy peak and the Compton edge. \\ \\
+\noindent
+	Compton scattering also contributes to the back scattering peak from materials outside of the detector.
+
+\subsection{Pair production}
+	Pair production occurs near the nucleus of an atom and results in a positron-electron pair. Pair production can only occur for gamma-rays having incident energies greater than 1.022MeV. When the positron-electron pair come to rest, they are converted to into two photons. 
+
+\subsection{Spectral building}
+	The graphing of a spectra can be done in a multiple manners, for this experiment a single channel analyzer and a counter/timer were utilized. This lab involved constructing the spectra in two different methods:
+	\begin{enumerate}
+		\item Differential mode
+		\item Integral mode
+	\end{enumerate}
+	\subsubsection{Differential mode}
+		The lower level discriminator, LLD, is set to a specified value. In conjunction with a small window, $\Delta E$, a spectrum is constructed by taking multiple measurements at values of the LLD. This effectively creates bins that can later be converted into an equivalent energy. 
+	\subsubsection{Integral mode}
+		A large window is set a to a large value. The LLD is then raised, thus any count at or above the LLD setting is counted. To directly compare the data collected in integral mode, equation (\ref{eq:convertion}) is used.
+		\begin{equation}
+			C_{con}=\frac{C_{N-1}-C_N}{LLD_{N}-LLD_{N-1}}
+			\label{eq:convertion}
+	\end{equation}
+	Where N is the count number and C is in counts. This method of constructing the spectrum has multiple sources of error, namely the two measurements. The additional error is accounted for in equation (\ref{eq:prop_error}).\cite{mcgregor}
+	\begin{equation}
+		\sigma_u=\sqrt{\left(\frac{\partial{u}}{\partial{C_1}}\right)^2\sigma_{C_1}^2+\left(\frac{\partial{u}}{\partial{C_2}}\right)^2\sigma_{C_2}^2}=\sqrt{\sigma_{C_1}^2+\sigma_{C_2}^2}
+	\label{eq:prop_error}
+	\end{equation}
+\subsection{Scintillator principles}
+	The detector used in this experiment was a NaI(Tl) crystal. The crystal interacts with the incident photon through the previously mentioned interaction methods. When the electrons deexcite, they release light. For the detector used, the optimal wave length is 410 nm.\cite{mcgregor} After the light has been emitted it is transmitted via reflection to a photocathode within a photomultiplier tube. The photocathode uses the photoelectric effect to convert light into photoelectrons. The photoelectrons are emitted from the cathode and directed into a vacuum with multiple dynodes.\cite{mcgregor} Each dynode has an applied voltage bias which is developed from either a series of voltage dividers or from a Cockroft-Walton multiplier. An example of a the circuitry for a Cockroft-Walton multiplier is seen in Figure \ref{fig:cw_multiplier}. 
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.75\linewidth]{cockroft_walton.png}
+		\caption{A typical Cockroft-Walton used to generate a high DC voltage for the PMT dynodes. \cite{WinNT}}
+		\label{fig:cw_multiplier}
+	\end{figure}
+The multiplier takes an oscillating input signal and converts it into a DC voltage via the rectifying diodes. \\ \\
+\noindent
+At the output of the PMT, the anode, the signal will have been multiplied by a factor of~$10^6$.\cite{mcgregor} This signal is sent to an amplifier to be shaped, then to either a multi-channel analyzer, or in this experiment to a counter/timer. \\ \\
+\noindent
+	To determine the quality of the detector, the resolution can be determine from equation (\ref{eq:resolution}). The higher the resolution of the detector, the worse the detector is and vice versa.\cite{mcgregor}
+		\begin{equation}
+			Res=\left(\frac{FWHM}{V_{Peak}}\right)100\%
+			\label{eq:resolution}
+		\end{equation}
+The energy associated with the bins being constructed is found using equation (\ref{eq:convert}). Where $E_{Max}$ is the maximum energy of the decay chain, $V_{Peak}$ is the voltage at the full energy peak, and $V_{LLD}$ is the LLD setting at the of interest. This equation does assume linearity between points, which for most applications is a decent approximation.
+	\begin{equation}
+		E_{LLD}=\left(\frac{E_{Max}}{V_{Peak}}\right)V_{LLD}
+		\label{eq:convert}
+	\end{equation}
+		 
+
+\end{document}
