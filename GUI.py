@@ -232,8 +232,10 @@ class Monitor(QMainWindow):
         '''Call the calculation method and run it to get the results'''
         self.calculate.setDisabled(True)
         self.geometry_entry.setDisabled(True)
+        a=time.time()
         self.values=Voltage_Calculation(self.nodes_x,self.nodes_y,
                              self.total_x_,self.total_y_,self.calculation_data)
+        print(time.time()-a)
         self.plot=PlotCanvas(self.values.x_nodes,
                              self.values.y_nodes,self.values.vector)
         self.calculate.setEnabled(True)

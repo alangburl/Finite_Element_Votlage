@@ -173,18 +173,18 @@ class Voltage_Calculation():
             for j in range(start_location,end_location+1):
                 self.a_matrix[j][j]=1
                 self.b_matrix[j]=geometry_list[4]
+                
         elif geometry_list[1]==self.y_dim and geometry_list[3]==0:
-            for j in range(len(self.x_nodes)-1,-1,-1):
-                if geometry_list[0]>=self.x_nodes[j]:
-                    start_location=j
-                    print(start_location)
+            rev_list=np.flip(self.x_nodes)
+            for j in range(len(rev_list)):
+                if geometry_list[0]>=rev_list[j]:
+                    start_location=j+2
                     break
-            for j in range(len(self.x_nodes)-1,-1,-1):
-                if geometry_list[0]+geometry_list[2]>=self.x_nodes[j]:
-                    end_location=j
-                    print(end_location)
+            for j in range(len(rev_list)):
+                if geometry_list[0]+geometry_list[2]>=rev_list[j]:
+                    end_location=j+1
                     break
-            for j in range(end_location+1,start_location,-1):
+            for j in range(end_location,start_location):
                 self.a_matrix[-j][-j]=1
                 self.b_matrix[-j]=geometry_list[4]
         return [start_location,end_location,geometry_list[4]]
@@ -192,7 +192,6 @@ class Voltage_Calculation():
     def solve(self):
         '''Sovle the equation Ax=b for the x vector, the potentilal voltages
         '''
-#        voltage_vector=np.matmul(np.linalg.inv(self.a_matrix),self.b_matrix)
         voltage_vector=np.linalg.solve(self.a_matrix,self.b_matrix)
         self.vector=voltage_vector.reshape(
                 [len(self.y_nodes),len(self.x_nodes)])
