@@ -1,10 +1,9 @@
 \documentclass[12pt]{article}
 
-%\usepackage{amsmath}
-%\usepackage{gensymb}
-%\usepackage{standalone}
-%\usepackage{verbatim}
-
+\usepackage{amsmath}
+\usepackage{gensymb}
+\usepackage{standalone}
+\usepackage{verbatim}
 \usepackage[utf8]{inputenc}
 \usepackage{setspace}
 \usepackage[a4paper,margin=1in,footskip=0.25in]{geometry}
@@ -16,22 +15,24 @@
 \usepackage[utf8]{inputenc}
 \usepackage{setspace}
 \usepackage{url}
-\usepackage{longtable}
+\usepackage{titlepic}
 
-		\title{Finite Element Approximation of Poisson's Equation for Determination of Internal Voltages}
-		%\includegraphics[width=\linewidth]{4_terminal.png}
-		\author{Alan Burl}
-		\date{\today{}}
+\title{Finite Element Approximation of Poisson's Equation for Determination of Internal Voltages}
+\titlepic{\includegraphics[width=\linewidth]{4_terminal.png}}
+\author{Alan Burl}
+\date{\today}
+
 \begin{document}
 
-\doublespacing
-%\maketitle
+	\maketitle
+	\clearpage
 	\input{Problem_Statement.tex}
 %	\input(Theory.tex}
-%	\input{Boundary_Condition_Determination.tex}
-	%\input{Field_Determination.tex}
-	%\input{Experimental_Procedure.tex}
-	%\input{Results.tex}
+	\input{Matrix_Development.tex}
+	\input{Code_Validation.tex}
+	\input{Results.tex}
+	\section{Code Usage}
+		The code used in the development of this can be found on GitHub at \url{https://github.com/alangburl/Finite_Element_Votlage.git}. It is also included in the included zip file. The code was developed using Python3.7.1 and PyQt5. Functionality of this code is not guaranteed if deployed using older/newer software. The package needed for calculation, NumPy, is included with many popular scientific distributions of Python, including Anaconda. Launching and execution of the code should be done via command line. Execution of this code in Spyder will result in erratic behavior.
 	%\clearpage
 	%\bibliographystyle{unsrt}
 	%\bibliography{bibliography}
