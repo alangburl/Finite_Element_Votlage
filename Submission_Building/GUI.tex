@@ -1,0 +1,28 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\usepackage{gensymb}
+\usepackage{standalone}
+\usepackage{verbatim}
+\usepackage[utf8]{inputenc}
+\usepackage{setspace}
+\usepackage[a4paper,margin=1in,footskip=0.25in]{geometry}
+\usepackage{graphicx}
+\usepackage{mathptmx}
+\usepackage{booktabs}
+\usepackage{cite}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+
+\begin{document}
+\section{Code Usage}
+		The code used in the development of this can be found on GitHub at \url{https://github.com/alangburl/Finite_Element_Votlage.git}. It is also included in the included zip file. The code was developed using Python3.7.1 and PyQt5. Functionality of this code is not guaranteed if deployed using older/newer software. The package needed for calculation, NumPy, is included with many popular scientific distributions of Python, including Anaconda. Launching and execution of the code should be done via command line. Execution of this code in Spyder will result in erratic behavior.
+\subsection{GUI Interface}
+	To mitigate the possibility of errant arguments into code, human interfacing is done via a graphical user interface. This interface draws the base geometry for visual verification of correct geometric entry. The geometry is draw with a scaling of $1\mu m$ is represented by $1pixel$. The graphical user interface is seen in Figure \ref{fig:gui}. The interfacing code does allow for any value to be entered into any field, but entry of none numeric values will result in a fatal error causing the program to crash. 
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=\linewidth]{GUI.png}
+		\caption{Graphical User Interface for human interfacing with solution}
+		\label{fig:gui}
+	\end{figure}
+
+\end{document}
