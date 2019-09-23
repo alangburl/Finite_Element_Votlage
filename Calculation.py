@@ -196,6 +196,7 @@ class Voltage_Calculation():
         self.vector=voltage_vector.reshape(
                 [len(self.y_nodes),len(self.x_nodes)])
         self.plotting()
+        return self.vector
     def plotting(self):
         '''Plot the resulting voltages as a function of the position
         '''
@@ -203,9 +204,11 @@ class Voltage_Calculation():
         contour=ax.contourf(self.x_nodes,self.y_nodes,self.vector,levels=20)
 #        ax.clabel(contour,color='k')
         ax.set_title('Potential distribution across planar device')
+        ax.set_xlabel(r'x Distance ($\mu m$)')
+        ax.set_ylabel(r'y Distance ($\mu m$)')
         color_bar=fig.colorbar(contour)            
 if __name__=="__main__":
     s=time.time()
-    x=Voltage_Calculation(100,100,50,50,{0:[0,0,50,0,500],1:[0,50,10,0,200],
-                                         2:[45,50,4.5,0,50]})
+    x=Voltage_Calculation(100,100,100,100,{0:[0,0,50,0,500],1:[0,100,20,0,200],
+                                         2:[80,100,20,0,50]})
     run=time.time()-s
